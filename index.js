@@ -11,7 +11,7 @@ const PORT = process.env.PORT || 5000;
 const allowedOrigins = [
   "http://localhost:5173",
   // "http://192.168.1.10:5173",
-  "https://yudzflix.vercel.app/",
+  "https://yudzflix.vercel.app",
 ];
 
 app.use(
