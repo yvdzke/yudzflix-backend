@@ -59,7 +59,7 @@ exports.login = async (req, res) => {
     // 3. Cek User & Password Sekaligus
     // Teknik "Short-circuit": Kalau user gak ada, bcrypt gak bakal dijalankan (aman dari error)
     if (!user || !(await bcrypt.compare(password, user.password))) {
-      return res.status(401).json({ message: "Email atau Password Salah" });
+      return res.status(401).json({ message: "Incorrect Email or Password" });
     }
 
     // 4. Generate Token
