@@ -1,0 +1,41 @@
+const nodemailer = require("nodemailer");
+
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+});
+
+const sendVerificationEmail = async (userEmail, token) => {
+  // Tentukan link verifikasi berdasarkan environment
+  const BASE_URL =
+    process.env.NODE_ENV === "production"
+      ? "https://yudzflix-backend.vercel.app"
+      : "http://localhost:5000";
+
+  const verificationLink = `${BASE_URL}/api/auth/verify?token=${token}`;
+
+  const mailOptions = {
+    from: '"YudzFlix Admin" <no-reply@yudzflix.com>',
+    to: userEmail,
+    subject: "Verifikasi Akun YudzFlix Kamu 🎬",
+    html: `
+      <h3>Halo! 👋</h3>
+      <p>Klik link ini untuk verifikasi akun:</p>
+      <a href="${verificationLink}">Verifikasi Email</a>
+    `,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log("Email terkirim ke: " + userEmail);
+    return true;
+  } catch (error) {
+    console.error("Gagal kirim email:", error);
+    return false;
+  }
+};
+
+module.exports = { sendVerificationEmail };

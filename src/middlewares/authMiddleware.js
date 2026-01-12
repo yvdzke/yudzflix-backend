@@ -6,7 +6,7 @@ const verifyToken = (req, res, next) => {
 
   // Kalau gak ada header Authorization
   if (!authHeader) {
-    return res.status(401).json({ message: "Akses Ditolak! Token tidak ada." });
+    return res.status(401).json({ message: "Access Denied Token not found!" });
   }
 
   // Pisahkan kata "Bearer" dan token aslinya
@@ -15,7 +15,7 @@ const verifyToken = (req, res, next) => {
   if (!token) {
     return res
       .status(401)
-      .json({ message: "Akses Ditolak! Format token salah." });
+      .json({ message: "Access Denied Wrong Token Format!" });
   }
 
   try {
