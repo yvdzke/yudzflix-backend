@@ -9,8 +9,7 @@ const register = async (req, res) => {
   try {
     const { fullname, username, email, password } = req.body;
 
-    // A. Cek apakah email sudah terdaftar?
-    // A & B. Cek Email ATAU Username sekaligus (Lebih Hemat Resource)
+    // A. Cek Email ATAU Username sekaligus
     const userExist = await pool.query(
       "SELECT * FROM users WHERE email = $1 OR username = $2",
       [email, username]
@@ -19,7 +18,6 @@ const register = async (req, res) => {
     if (userExist.rows.length > 0) {
       const foundUser = userExist.rows[0];
 
-      // Kita cek manual di sini biar pesan errornya tetep spesifik
       if (foundUser.email === email) {
         return res.status(400).json({ message: "Email already registered!" });
       }
@@ -39,7 +37,6 @@ const register = async (req, res) => {
     const verificationToken = uuidv4();
 
     // D. Masukkan ke Database
-    // Penting: is_verified default-nya FALSE (Belum aktif)
     const newUser = await pool.query(
       `INSERT INTO users (fullname, username, email, password, verification_token, is_verified) 
        VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
@@ -47,7 +44,6 @@ const register = async (req, res) => {
     );
 
     // E. Kirim Email Verifikasi
-    // (Proses ini kita 'await' biar user tau kalau email gagal dikirim)
     const emailSent = await sendVerificationEmail(email, verificationToken);
 
     if (!emailSent) {
@@ -89,8 +85,7 @@ const login = async (req, res) => {
 
     const user = userResult.rows[0];
 
-    // B.  CEK STATUS VERIFIKASI
-    // Kalau is_verified masih FALSE, tolak loginnya!
+    // B. CEK STATUS VERIFIKASI
     if (!user.is_verified) {
       return res.status(401).json({
         message: "Please verify your email first.",
@@ -116,7 +111,7 @@ const login = async (req, res) => {
         fullname: user.fullname,
         username: user.username,
         email: user.email,
-        avatar: user.avatar, // Kalau ada kolom avatar
+        avatar: user.avatar,
       },
     });
   } catch (error) {
@@ -125,17 +120,16 @@ const login = async (req, res) => {
   }
 };
 
-// --- 3. VERIFIKASI EMAIL (Dipanggil saat klik link di email) ---
+// --- 3. VERIFIKASI EMAIL ---
 const verifyEmail = async (req, res) => {
   try {
-    // Ambil token dari URL (contoh: /api/auth/verify?token=abc-123)
     const { token } = req.query;
 
     if (!token) {
       return res.status(400).send("<h1>Token tidak ditemukan! ❌</h1>");
     }
 
-    // A. Cari user yang punya token ini
+    // A. Cari user
     const userResult = await pool.query(
       "SELECT * FROM users WHERE verification_token = $1",
       [token]
@@ -147,15 +141,13 @@ const verifyEmail = async (req, res) => {
 
     const user = userResult.rows[0];
 
-    // B. Aktifkan User (Update DB)
-    // - Set is_verified jadi TRUE
-    // - Hapus verification_token jadi NULL (biar link gak bisa dipake 2x)
+    // B. Aktifkan User
     await pool.query(
       "UPDATE users SET is_verified = $1, verification_token = $2 WHERE id = $3",
       [true, null, user.id]
     );
 
-    // C. Tampilkan Halaman HTML Sederhana
+    // C. Tampilkan Halaman Sukses
     res.status(200).send(`
       <body>
       <div style="text-align: center; padding: 50px; font-family: Arial;">
@@ -172,4 +164,35 @@ const verifyEmail = async (req, res) => {
   }
 };
 
-module.exports = { register, login, verifyEmail };
+// --- 4. UPDATE PROFILE (BARU) ---
+const updateProfile = async (req, res) => {
+  try {
+    // req.user.id didapat dari Middleware Auth (verifyToken)
+    const userId = req.user.id;
+    const { username, avatar } = req.body;
+
+    // Update Database
+    const updatedUser = await pool.query(
+      "UPDATE users SET username = $1, avatar = $2 WHERE id = $3 RETURNING *",
+      [username, avatar, userId]
+    );
+
+    if (updatedUser.rows.length === 0) {
+      return res.status(404).json({ message: "User tidak ditemukan!" });
+    }
+
+    // Hapus password sebelum dikirim ke frontend
+    const userResult = updatedUser.rows[0];
+    delete userResult.password;
+
+    res.json({
+      message: "Profil berhasil diperbarui! ✨",
+      user: userResult,
+    });
+  } catch (err) {
+    console.error("Update Profile Error:", err.message);
+    res.status(500).json({ message: "Server Error saat update profil" });
+  }
+};
+
+module.exports = { register, login, verifyEmail, updateProfile };
