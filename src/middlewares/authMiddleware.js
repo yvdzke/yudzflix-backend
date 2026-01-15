@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 
 const verifyToken = (req, res, next) => {
-  // 1. Ambil token dari Header (Format biasanya: "Bearer <token>")
+  // 1. Ambil token dari Header Authorization
   const authHeader = req.headers["authorization"];
 
   // Kalau gak ada header Authorization
@@ -25,7 +25,7 @@ const verifyToken = (req, res, next) => {
     // Simpan data user yang ada di token ke dalam request biar bisa dipake di controller
     req.user = verified;
 
-    // 3. Lanjut ke proses berikutnya (Controller)
+    // 3. Lanjut ke proses berikutnya controller
     next();
   } catch (err) {
     res.status(400).json({ message: "Token Invalid!" });

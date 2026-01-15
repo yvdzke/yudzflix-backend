@@ -3,8 +3,8 @@ const nodemailer = require("nodemailer");
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
+    user: process.env.SMTP_USER, // my email
+    pass: process.env.SMTP_PASS, // app password
   },
 });
 
@@ -18,22 +18,22 @@ const sendVerificationEmail = async (userEmail, token) => {
   const verificationLink = `${BASE_URL}/api/auth/verify?token=${token}`;
 
   const mailOptions = {
-    from: '"YudzFlix Admin" <no-reply@yudzflix.com>',
+    from: '"YudzFlix Admin (yvdzke)" <no-reply@yudzflix.com>',
     to: userEmail,
-    subject: "Verifikasi Akun YudzFlix Kamu 🎬",
+    subject: "Verifikasi Akun YudzFlix Guysssssssssss 🎬",
     html: `
       <h3>Halo! 👋</h3>
-      <p>Klik link ini untuk verifikasi akun:</p>
-      <a href="${verificationLink}">Verifikasi Email</a>
+      <p>Klik ae linglung dibawah yahhh huhuhuhu:</p>
+      <a href="${verificationLink}">Nihhhh Verif dulu kocak baru login kwkwkw pencet ae yah</a>
     `,
   };
 
   try {
     await transporter.sendMail(mailOptions);
-    console.log("Email terkirim ke: " + userEmail);
+    console.log("Email sent to: " + userEmail);
     return true;
   } catch (error) {
-    console.error("Gagal kirim email:", error);
+    console.error("Failed to send email:", error);
     return false;
   }
 };

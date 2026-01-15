@@ -1,7 +1,7 @@
 const multer = require("multer");
 const path = require("path");
 
-// --- ATURAN PENYIMPANAN ---
+// rules penyimpanan file
 const storage = multer.diskStorage({
   // 1. Simpan di folder 'uploads'
   destination: function (req, file, cb) {
@@ -15,7 +15,7 @@ const storage = multer.diskStorage({
   },
 });
 
-// --- FILTER BIAR CUMA GAMBAR YG BOLEH MASUK ---
+// filter file cuma gambar ae
 const fileFilter = (req, file, cb) => {
   if (file.mimetype.startsWith("image/")) {
     cb(null, true);

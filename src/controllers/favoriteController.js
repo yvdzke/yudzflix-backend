@@ -1,12 +1,12 @@
 const pool = require("../config/database");
 
-// 1. ADD FAVORITE (Buat mindahin data TMDB ke DB Lokal)
+// add fav to database
 exports.addFavorite = async (req, res) => {
   try {
     const userId = req.user.id; // Dari Token
     const { title, poster_path, release_date, vote_average, genre } = req.body;
 
-    // Cek biar gak double
+    // cross check data ada double atau kaga
     const check = await pool.query(
       "SELECT * FROM favorites WHERE user_id = $1 AND title = $2",
       [userId, title]
@@ -28,29 +28,29 @@ exports.addFavorite = async (req, res) => {
   }
 };
 
-// 2. GET FAVORITES (TUGAS UTAMA: SEARCH, SORT, FILTER)
+// sort, filter, search fav from database
 exports.getFavorites = async (req, res) => {
   try {
     const userId = req.user.id;
-    // Ambil params dari URL
+    // get params
     const { search, genre, sort = "desc" } = req.query;
 
     let query = "SELECT * FROM favorites WHERE user_id = $1";
     let queryParams = [userId];
 
-    // --- LOGIC SEARCH (Cari Judul) ---
+    // logic search
     if (search) {
       query += ` AND title ILIKE $${queryParams.length + 1}`;
       queryParams.push(`%${search}%`);
     }
 
-    // --- LOGIC FILTER (Filter Genre) ---
+    // logic filter genre
     if (genre) {
       query += ` AND genre ILIKE $${queryParams.length + 1}`;
       queryParams.push(`%${genre}%`);
     }
 
-    // --- LOGIC SORT (Urutkan Rating) ---
+    // logic sort
     const sortOrder = sort.toLowerCase() === "asc" ? "ASC" : "DESC";
     query += ` ORDER BY vote_average ${sortOrder}`;
 
@@ -66,7 +66,7 @@ exports.getFavorites = async (req, res) => {
   }
 };
 
-// 3. DELETE FAVORITE (Hapus Film)
+// delete fav from database
 exports.removeFavorite = async (req, res) => {
   try {
     const userId = req.user.id;

@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 const { v4: uuidv4 } = require("uuid"); // Library buat bikin token acak
 const { sendVerificationEmail } = require("../services/emailService"); // Import tukang pos kita
 
-// --- 1. REGISTER USER ---
+// register new user
 const register = async (req, res) => {
   try {
     const { fullname, username, email, password } = req.body;
@@ -33,7 +33,7 @@ const register = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // C. Generate Token Unik (Tiket Verifikasi)
+    // C. Generate Token Unik
     const verificationToken = uuidv4();
 
     // D. Masukkan ke Database
@@ -68,7 +68,7 @@ const register = async (req, res) => {
   }
 };
 
-// --- 2. LOGIN USER ---
+// login user
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -85,7 +85,7 @@ const login = async (req, res) => {
 
     const user = userResult.rows[0];
 
-    // B. CEK STATUS VERIFIKASI
+    // B. cek Verifikasi Email
     if (!user.is_verified) {
       return res.status(401).json({
         message: "Please verify your email first.",
@@ -120,7 +120,7 @@ const login = async (req, res) => {
   }
 };
 
-// --- 3. VERIFIKASI EMAIL ---
+// verify email
 const verifyEmail = async (req, res) => {
   try {
     const { token } = req.query;
@@ -147,7 +147,7 @@ const verifyEmail = async (req, res) => {
       [true, null, user.id]
     );
 
-    // C. Tampilkan Halaman Sukses
+    // C. Tampilkan Halaman Sukses ini kalo udah verified bakal muncul ini guys
     res.status(200).send(`
       <body>
       <div style="text-align: center; padding: 50px; font-family: Arial;">
@@ -164,7 +164,7 @@ const verifyEmail = async (req, res) => {
   }
 };
 
-// --- 4. UPDATE PROFILE (BARU) ---
+// update user profile
 const updateProfile = async (req, res) => {
   try {
     // req.user.id didapat dari Middleware Auth (verifyToken)
@@ -186,12 +186,12 @@ const updateProfile = async (req, res) => {
     delete userResult.password;
 
     res.json({
-      message: "Profil berhasil diperbarui! ✨",
+      message: "Updated Profile Successfully!",
       user: userResult,
     });
   } catch (err) {
     console.error("Update Profile Error:", err.message);
-    res.status(500).json({ message: "Server Error saat update profil" });
+    res.status(500).json({ message: "Server Error When Updating Profile" });
   }
 };
 

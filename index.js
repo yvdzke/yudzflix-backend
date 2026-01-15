@@ -22,7 +22,7 @@ app.use(
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
-        console.log("Blocked by CORS:", origin); // Buat debug di log render
+        console.log("Blocked by CORS:", origin); // Debug
         callback(new Error("Not allowed by CORS"));
       }
     },
@@ -35,7 +35,6 @@ app.use(express.json());
 app.use("/uploads", express.static("uploads"));
 
 // Routes
-
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/favorites", favoriteRoutes);
