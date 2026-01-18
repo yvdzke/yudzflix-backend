@@ -1,10 +1,12 @@
-const router = require("express").Router();
+const express = require("express");
+const router = express.Router();
 
-// Import Service upload
-const upload = require("../services/uploadService");
-const uploadController = require("../controllers/uploadController");
+// 1. Panggil Controller (Logika upload ke Cloudinary)
+const { uploadImage } = require("../controllers/uploadController");
 
-// Middleware: upload.single("file") -> Artinya cuma boleh upload 1 file, dan nama field-nya harus "file"
-router.post("/", upload.single("file"), uploadController.uploadImage);
+// 2. Panggil Middleware (Nangkap file dari request)
+const upload = require("../middlewares/upload");
+// 3. Route Upload Image ke Cloudinary
+router.post("/", upload.single("file"), uploadImage);
 
 module.exports = router;

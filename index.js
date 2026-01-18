@@ -27,7 +27,7 @@ app.use(
       }
     },
     credentials: true, // Enable cookies and auth headers
-  })
+  }),
 );
 // ---------------------------------------------
 
@@ -35,6 +35,7 @@ app.use(express.json());
 app.use("/uploads", express.static("uploads"));
 
 // Routes
+
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/favorites", favoriteRoutes);
