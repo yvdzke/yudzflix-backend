@@ -9,7 +9,7 @@ const transporter = nodemailer.createTransport({
 });
 
 const sendVerificationEmail = async (userEmail, token) => {
-  // Tentukan link verifikasi berdasarkan environment
+  // Switch URL
   const BASE_URL =
     process.env.NODE_ENV === "production"
       ? "https://yudzflix-backend.vercel.app"
