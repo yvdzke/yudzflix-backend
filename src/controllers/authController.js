@@ -12,7 +12,7 @@ const register = async (req, res) => {
     // A. Cek Email ATAU Username sekaligus
     const userExist = await pool.query(
       "SELECT * FROM users WHERE email = $1 OR username = $2",
-      [email, username]
+      [email, username],
     );
 
     if (userExist.rows.length > 0) {
@@ -40,7 +40,7 @@ const register = async (req, res) => {
     const newUser = await pool.query(
       `INSERT INTO users (fullname, username, email, password, verification_token, is_verified) 
        VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-      [fullname, username, email, hashedPassword, verificationToken, false]
+      [fullname, username, email, hashedPassword, verificationToken, false],
     );
 
     // E. Kirim Email Verifikasi
@@ -76,11 +76,19 @@ const login = async (req, res) => {
     // A. Cari User
     const userResult = await pool.query(
       "SELECT * FROM users WHERE email = $1",
-      [email]
+      [email],
     );
 
     if (userResult.rows.length === 0) {
-      return res.status(401).json({ message: "Invalid email or password!" });
+      return res.status(401).json({ message: "Email not registered!" });
+    }
+
+    const validPassword = await bcrypt.compare(
+      password,
+      userResult.rows[0].password,
+    );
+    if (!validPassword) {
+      return res.status(401).json({ message: "Wrong password!" });
     }
 
     const user = userResult.rows[0];
@@ -132,7 +140,7 @@ const verifyEmail = async (req, res) => {
     // A. Cari user
     const userResult = await pool.query(
       "SELECT * FROM users WHERE verification_token = $1",
-      [token]
+      [token],
     );
 
     if (userResult.rows.length === 0) {
@@ -144,7 +152,7 @@ const verifyEmail = async (req, res) => {
     // B. Aktifkan User
     await pool.query(
       "UPDATE users SET is_verified = $1, verification_token = $2 WHERE id = $3",
-      [true, null, user.id]
+      [true, null, user.id],
     );
 
     // C. Tampilkan Halaman Sukses ini kalo udah verified bakal muncul ini guys
@@ -174,7 +182,7 @@ const updateProfile = async (req, res) => {
     // Update Database
     const updatedUser = await pool.query(
       "UPDATE users SET username = $1, avatar = $2 WHERE id = $3 RETURNING *",
-      [username, avatar, userId]
+      [username, avatar, userId],
     );
 
     if (updatedUser.rows.length === 0) {
