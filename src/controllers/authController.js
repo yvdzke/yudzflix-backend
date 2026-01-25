@@ -83,13 +83,13 @@ const login = async (req, res) => {
       return res.status(401).json({ message: "Email not registered!" });
     }
 
-    const validPassword = await bcrypt.compare(
-      password,
-      userResult.rows[0].password,
-    );
-    if (!validPassword) {
-      return res.status(401).json({ message: "Wrong password!" });
-    }
+    // const validPassword = await bcrypt.compare(
+    //   password,
+    //   userResult.rows[0].password,
+    // );
+    // if (!validPassword) {
+    //   return res.status(401).json({ message: "Wrong password!" });
+    // }
 
     const user = userResult.rows[0];
 
@@ -103,7 +103,7 @@ const login = async (req, res) => {
     // C. Cek Password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(401).json({ message: "Invalid email or password!" });
+      return res.status(401).json({ message: "Wrong password!" });
     }
 
     // D. Bikin Token JWT
